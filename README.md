@@ -1,58 +1,90 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# TickTrack — Ticketing System API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A support ticketing system built with Laravel 12 as a REST API, designed to be connected to a Vue.js frontend.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Full authentication system (Register / Login / Logout / Profile) using Laravel Sanctum
+- Complete CRUD for tickets with filtering by search, status, and priority
+- Ticket replies system
+- Role-based permissions (User / Admin)
+- Monthly statistics dashboard
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Tech Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Backend:** Laravel 12
+- **Authentication:** Laravel Sanctum (API Token)
+- **Database:** MySQL
 
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Getting Started
 
 ```bash
-composer require laravel/boost --dev
+# Clone the repository
+git clone https://github.com/Mohamed-Eltantawy/ticktrack-app.git
+cd ticktrack-app
 
-php artisan boost:install
+# Install dependencies
+composer install
+
+# Set up environment file
+cp .env.example .env
+php artisan key:generate
+
+# Configure your database credentials in .env, then run migrations
+php artisan migrate
+
+# Install Sanctum (if not already installed)
+php artisan vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"
+
+# Start the server
+php artisan serve
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+The project will run at: `http://127.0.0.1:8000`
 
-## Contributing
+## API Endpoints
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Authentication
 
-## Code of Conduct
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|--------------|----------------|
+| POST | `/api/register` | Register a new account | No |
+| POST | `/api/login` | Log in | No |
+| GET | `/api/me` | Get current user profile | Yes |
+| POST | `/api/logout` | Log out | Yes |
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Tickets
 
-## Security Vulnerabilities
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|--------------|----------------|
+| GET | `/api/ticket` | List all tickets (filterable by search, status, priority) | Yes |
+| GET | `/api/ticket/{code}` | Show a single ticket in detail | Yes |
+| POST | `/api/ticket` | Create a new ticket | Yes |
+| POST | `/api/ticket/{code}/reply` | Add a reply to a ticket | Yes |
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Dashboard
 
-## License
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|--------------|----------------|
+| GET | `/api/dashboard/statistics` | Monthly ticket statistics | Yes |
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Example: Login Request
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/login \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{"email":"test@example.com","password":"12345678"}'
+```
+
+The response includes a `token` which should be used in subsequent requests as:
+```
+Authorization: Bearer {token}
+```
+
+## Database Structure
+
+Core tables: `users`, `tickets`, `ticket_replies`, `personal_access_tokens`.
+
+- `users` has a `hasMany` relationship with `tickets` and `ticket_replies`
+- `tickets` has a `hasMany` relationship with `ticket_replies`
